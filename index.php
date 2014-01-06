@@ -3,8 +3,6 @@
 require_once('sync.php');
 require_once('keysandurls.php');
 
-$displayForm = true;
-
 function getInfo($KEYS, $URLS) {
   if(!isset($_POST['username']))
     return false;

@@ -13,9 +13,9 @@
 
   var syncKeyToEncKey = function(key, username) {
     key = key
-      .replace('8', 'l', 'g')
-      .replace('9', 'o', 'g')
-      .replace('-', '', 'g');
+      .replace(/8/g, 'l')
+      .replace(/9/g, 'o')
+      .replace(/-/g, '');
     key = key.toUpperCase();
     key = CryptoJS.enc.Base32.parse(key);
     key = CryptoJS.HmacSHA256('Sync-AES_256_CBC-HMAC256' + usernameMunge(username) + String.fromCharCode(1), key);

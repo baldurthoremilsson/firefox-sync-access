@@ -2,6 +2,7 @@
   var ONE_MINUTE = 60 * 1000; // for setTimeout
   var decryptionKey = null;
   var decryptionKeyTimeout = null;
+  var links = [];
 
   var exit = function() {
     window.location = window.location;
@@ -108,7 +109,16 @@
     return returnKey;
   };
 
-  var addRecord = function(ul, record, defaultKey) {
+  var urlKey = function(url) {
+    var key = url.replace('http://', '').replace('https://', '');
+    if(key.indexOf('.') == -1)
+      return key;
+
+    var parts = key.split('.');
+    return parts[parts.length-2];
+  };
+
+  var addRecord = function(record, defaultKey) {
     var decr = decryptRecord(record, defaultKey);
     if (decr.deleted)
       return;
@@ -145,7 +155,24 @@
 
     a.one('click', show);
     li.append(a);
-    ul.append(li);
+    links.push({
+      element: li,
+      url: decr.hostname,
+      urlLower: decr.hostname.toLowerCase(),
+      key: urlKey(decr.hostname)
+    });
+  };
+
+  var createFilterBox = function() {
+    return $('<input>').on('keyup', function() {
+      var search = $(this).val().toLowerCase();
+      links.forEach(function(link) {
+        if(link.urlLower.indexOf(search) == -1)
+          link.element.hide();
+        else
+          link.element.show();
+      });
+    });
   };
 
   $(function() {
@@ -155,10 +182,17 @@
       var defaultKey = getKey(encKey, 'default');
       var ul = $('<ul>');
       info.passwords.forEach(function(record) {
-        addRecord(ul, record, defaultKey);
+        addRecord(record, defaultKey);
         return;
       });
+      links.sort(function(a, b) { return a.key > b.key; });
+      links.forEach(function(link) {
+        ul.append(link.element);
+      });
+      var filterBox = createFilterBox();
+      $('body').append(filterBox);
       $('body').append(ul);
+      filterBox.focus();
     });
   });
 })(jQuery);

@@ -1,8 +1,23 @@
 (function($) {
   var ONE_MINUTE = 60 * 1000; // for setTimeout
+  var decryptionKey = null;
+  var decryptionKeyTimeout = null;
 
   var exit = function() {
     window.location = window.location;
+  };
+
+  var setDecryptionKey = function(key) {
+    decryptionKey = key;
+    clearTimeout(decryptionKeyTimeout);
+    decryptionKeyTimeout = setTimeout(function() {
+      decryptionKey = null;
+    }, ONE_MINUTE);
+  };
+
+  var clearDecryptionKey = function() {
+    clearTimeout(decryptionKeyTimeout);
+    decryptionKey = null;
   };
 
   var usernameMunge = function(username) {
@@ -23,6 +38,12 @@
   };
 
   var decryptKey = function(el, key, callback) {
+    // We remember the decrypted key for one minute
+    if(decryptionKey !== null) {
+      callback(decryptionKey);
+      return;
+    }
+
     var tries = 0;
 
     var div = $('<div/>');
@@ -40,8 +61,9 @@
 
       var dec = CryptoJS.AES.decrypt(key, input.val());
       if(dec.toString() != "") {
-        callback(dec.toString(CryptoJS.enc.Utf8));
         div.detach();
+        setDecryptionKey(dec.toString(CryptoJS.enc.Utf8));
+        callback(decryptionKey);
         return false;
       }
 
@@ -114,6 +136,7 @@
 
       li.find('div').detach();
       clearTimeout(timeout);
+      clearDecryptionKey();
 
       a.one('click', show);
 

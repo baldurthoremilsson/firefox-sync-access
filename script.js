@@ -25,6 +25,7 @@
   var decryptKey = function(el, key, callback) {
     var tries = 0;
 
+    var div = $('<div/>');
     var form = $('<form/>');
     var input = $('<input type="password" placeholder="decrypt" autocomplete="off" autofocus="autofocus">');
     var br = $('<br>');
@@ -39,8 +40,8 @@
 
       var dec = CryptoJS.AES.decrypt(key, input.val());
       if(dec.toString() != "") {
-        form.detach();
         callback(dec.toString(CryptoJS.enc.Utf8));
+        div.detach();
         return false;
       }
 
@@ -58,7 +59,8 @@
       return false;
     });
 
-    el.append(form);
+    div.append(form);
+    el.append(div);
     input.focus();
   };
 
